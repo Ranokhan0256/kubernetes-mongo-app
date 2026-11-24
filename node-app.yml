@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: node-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: node-app
+  template:
+    metadata:
+      labels:
+        app: node-app
+    spec:
+      containers:
+        - name: node-app
+          image: kashmala027/node-mongo-db:03
+          env:
+            - name: MONGO_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: mongo-config
+                  key: MONGO_HOST
+            - name: MONGO_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: mongo-config
+                  key: MONGO_PORT
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+#unique key of the service instance
+  name: service-node-app
+spec:
+  selector:
+  #loadbalance traffic across pods matching
+    app: node-app
+  type: LoadBalancer
+  ports:  
+     #Accept traffic sent to port 80
+    - name: http
+      port: 8080
+      targetPort: 3000

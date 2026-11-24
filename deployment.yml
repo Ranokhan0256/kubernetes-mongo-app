@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-nodedb-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nodedb-app
+  template:
+    metadata:
+      labels:
+        app: nodedb-app
+    spec:
+      hostAliases:
+        - ip: "127.0.0.1"
+          hostnames:
+            - "mongo"
+      containers:
+        - name: nodedb-app
+          image: kashmala027/node-mongo-db:01
+          ports:
+            - containerPort: 3000
+        - name: mongo
+          image: mongo
+          ports:
+            - containerPort: 27017
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+#unique key of the service instance
+  name: service-my-nodedb-app
+spec:
+  selector:
+  #loadbalance traffic across pods matching
+    app: nodedb-app
+  ports:  
+     #Accept traffic sent to port 80
+    - name: http
+      port: 8080
+      targetPort: 3000
+  type: LoadBalancer
+
